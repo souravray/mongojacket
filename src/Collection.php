@@ -26,13 +26,23 @@ class Collection {
 		return (is_null($this->collection))?null:$this;
 	}
 
-	public function find($option="{}"){
-		$cursor = $this->collection->find(json_decode($option));
-		for($i=0; $i<$cursor->count();$i++){
-			echo "<code>";
-			echo json_encode(arrayToObject($cursor->getNext()));
-			echo "</code><br/>";
+	public function find($option=array()){
+		$documents = array();
+		try{
+			$cursor = $this->collection->find($option);
+			for($i=0; $i<$cursor->count();$i++){
+				array_push( $documents, arrayToObject($cursor->getNext()));
+			}
+		} catch(MongoResultException $e) {
+			throw new Exception('Query failed: '. $e->getMessage());
+		} catch(MongoCursorException $e) {
+			throw new Exception('Cursor error: '. $e->getMessage());
+		} catch(MongoCursorTimeoutException $e) {
+			throw new Exception('Cursor Timeout: '. $e->getMessage());
+		} catch(\Exception $e) {
+			throw new \Exception($e->getMessage());
 		}
+		return $documents;
 	}
 
 	public function bind($functionName, $function){
@@ -40,14 +50,10 @@ class Collection {
 			throw new Exception('Bind methos should be callable');
 		} else {
 			$this->callables[$functionName]=\Closure::bind($function, $this);
-			print_r($this->callables);
-			echo "<hr/>";
 		}
 	}
 
 	public function __call($functionName, $arguments){
-		print_r($this->callables);
-		echo "<hr/>";
 		if(!isset($this->callables[$functionName])){
 			throw new Exception('Unknown method');
 		} else {

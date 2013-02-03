@@ -31,17 +31,14 @@ class DB {
 
 	public function collection($collectionname) {
 		try{
-			//if(array_key_exists($collectionname, $this->collections)) {
-				if(isset($this->collections[$collectionname])){
-					return $this->collections[$collectionname];
-				} else {
-					$this->collections[$collectionname]=new Collection($this->db,$collectionname);
-					return $this->collections[$collectionname];
-				}
-		/*	} else {
-				$collections[$collectionname]=new Collection($this->db,$collectionname);
-				return $collections[$collectionname];
-			} */
+			
+			if(isset($this->collections[$collectionname])){
+				return $this->collections[$collectionname];
+			} else {
+				$this->collections[$collectionname]=new Collection($this->db,$collectionname);
+				return $this->collections[$collectionname];
+			}
+		
 		} catch(Exception $e) {
 			throw new Exception($e->getMessage());
 		} catch(\Exception $e) {
