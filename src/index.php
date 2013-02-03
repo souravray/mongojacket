@@ -8,14 +8,14 @@
 namespace MongoJacket;
 
 if (!extension_loaded('mongo')){
-	throw new MongoJacket\Exception('Mongo driver is missing');
+	throw new Exception('Mongo driver is missing');
 }
 
 spl_autoload_register(function ($classname) {
     $classname = ltrim($classname, "\\");
     preg_match('/^(.+)?([^\\\\]+)$/U', $classname, $match);
     $classname =  "../src/". str_replace(array("\\", "_"), "/", $match[2]) . ".php";
-    
+
     include_once $classname;
 });
 
