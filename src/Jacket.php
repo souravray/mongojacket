@@ -32,19 +32,23 @@ class Jacket {
 	}
 
 	public function db($dbname) {
+		echo "<br/><b>DBS:</b><br/>";
+		print_r($this->dbs);
+		echo "<hr/>";
+
 		try {
-			if(array_key_exists($dbname, $this->dbs) ) {
-				if(is_set($dbs[$dbname])){
-					return $dbs[$dbname];
+			//if(array_key_exists($dbname, $this->dbs) ) {
+				if(isset($this->dbs[$dbname])){
+					return $this->dbs[$dbname];
 				} else {
-					$dbs[$dbname]=new DB($this->connection,$dbname);
-					return $dbs[$dbname];
+					$this->dbs[$dbname]=new DB($this->connection,$dbname);
+					return $this->dbs[$dbname];
 				}
-			} else {
-				$dbs[$dbname]=new DB($this->connection,$dbname);
-				return $dbs[$dbname];
-			}
-		} catch(MongoJacket\Exception $e) {
+		/*	} else {
+				$thsi->dbs[$dbname]=new DB($this->connection,$dbname);
+				return $this->dbs[$dbname];
+			}*/
+		} catch(Exception $e) {
 			throw new Exception($e->getMessage());
 		} catch(\Exception $e) {
 			throw new \Exception($e->getMessage());

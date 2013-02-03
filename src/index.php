@@ -7,19 +7,17 @@
  */
 namespace MongoJacket;
 
-if (!extension_loaded('mongo')){
-	throw new Exception('Mongo driver is missing');
-}
-
 spl_autoload_register(function ($classname) {
     $classname = ltrim($classname, "\\");
     preg_match('/^(.+)?([^\\\\]+)$/U', $classname, $match);
     $classname =  "../src/". str_replace(array("\\", "_"), "/", $match[2]) . ".php";
-
+    echo $classname."<br/>";
     include_once $classname;
 });
 
-
+if (!extension_loaded('mongo')){
+	throw new Exception('Mongo driver is missing');
+}
 
 function arrayToObject($d) {
 	if (is_array($d)) {
