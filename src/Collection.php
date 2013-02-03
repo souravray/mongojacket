@@ -26,7 +26,7 @@ class Collection {
 		return (is_null($this->collection))?null:$this;
 	}
 
-	public function find($option=array()){
+	public function find($option=array(), $callback=null){
 		$documents = array();
 		try{
 			$cursor = $this->collection->find($option);
@@ -42,7 +42,12 @@ class Collection {
 		} catch(\Exception $e) {
 			throw new \Exception($e->getMessage());
 		}
-		return $documents;
+		if(is_callable($callback)){
+			\Closure::bind($callback, $this);
+			return $callback($documents);
+		} else {
+			return $documents;
+		}
 	}
 
 	public function bind($functionName, $function){
