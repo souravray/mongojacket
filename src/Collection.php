@@ -50,6 +50,29 @@ class Collection {
 		}
 	}
 
+	public function findOne($option=array(), $callback=null){
+		$document = null;
+		try{
+			$document  = $this->collection->findOne($option);
+			$document  = arrayToObject($document);
+			
+		} catch(MongoResultException $e) {
+			throw new Exception('Query failed: '. $e->getMessage());
+		} catch(MongoCursorException $e) {
+			throw new Exception('Cursor error: '. $e->getMessage());
+		} catch(MongoCursorTimeoutException $e) {
+			throw new Exception('Cursor Timeout: '. $e->getMessage());
+		} catch(\Exception $e) {
+			throw new \Exception($e->getMessage());
+		}
+		if(is_callable($callback)){
+			\Closure::bind($callback, $this);
+			return $callback($document);
+		} else {
+			return $document;
+		}
+	}
+
 	public function bind($functionName, $function){
 		if(!is_callable($function)){
 			throw new Exception('Bind methos should be callable');
