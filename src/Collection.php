@@ -26,7 +26,7 @@ class Collection {
 		return (is_null($this->collection))?null:$this;
 	}
 
-	public function find($option=array(), $callback=null){
+	public function find($option=array(), $function=null){
 		$documents = array();
 		try{
 			$cursor = $this->collection->find($option);
@@ -42,15 +42,15 @@ class Collection {
 		} catch(\Exception $e) {
 			throw new \Exception($e->getMessage());
 		}
-		if(is_callable($callback)){
-			\Closure::bind($callback, $this);
+		if(is_callable($function)){
+			$callback=\Closure::bind($function, $this);
 			return $callback($documents);
 		} else {
 			return $documents;
 		}
 	}
 
-	public function findOne($option=array(), $callback=null){
+	public function findOne($option=array(), $function=null){
 		$document = null;
 		try{
 			$document  = $this->collection->findOne($option);
@@ -65,8 +65,8 @@ class Collection {
 		} catch(\Exception $e) {
 			throw new \Exception($e->getMessage());
 		}
-		if(is_callable($callback)){
-			\Closure::bind($callback, $this);
+		if(is_callable($function)){
+			$callback = \Closure::bind($function, $this);
 			return $callback($document);
 		} else {
 			return $document;
