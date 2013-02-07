@@ -7,12 +7,15 @@
  */
 namespace MongoJacket;
 
-spl_autoload_register(function ($classname) {
+// PSR-0 Autoloader
+function MongoJacketAutoloader ($classname) {
     $classname = ltrim($classname, "\\");
-    preg_match('/^(.+)?([^\\\\]+)$/U', $classname, $match);
-    $classname =  str_replace(array("\\", "_"), "/", $match[1]). str_replace(array("\\", "_"), "/", $match[2]) . ".php";
-    include_once $classname;
-});
+   if( preg_match('/^MongoJacket\\\\/U', $classname)){
+	    preg_match('/^(.+)?([^\\\\]+)$/U', $classname, $match);
+	    $classname =  str_replace(array("\\", "_"), "/", $match[1]). str_replace(array("\\", "_"), "/", $match[2]) . ".php";
+	    include_once $classname;
+	}
+}
 
 if (!extension_loaded('mongo')){
 	throw new Exception('Mongo driver is missing');
