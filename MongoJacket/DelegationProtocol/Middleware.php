@@ -9,6 +9,7 @@ namespace MongoJacket\DelegationProtocol;
 
 define("JK_SQNC_PRE", "pre");
 define("JK_SQNC_POST", "post");
+define("JK_EVNT_INIT", "init");
 define("JK_EVNT_FIND", "find");
 define("JK_EVNT_SAVE", "save");
 define("JK_EVNT_DEL", "delete");
@@ -17,23 +18,60 @@ trait Middleware
 {
 	protected $middlewares=array();
 
-	protected function addMiddleware($newMiddleware, $event, $type) {
-		$newMiddleware->setCollection($this);
-		if(!isset($this->middlewares[$event . "-" .$type])){
-			$this->middlewares[$event . "-" .$type]=array();
-			$this->middlewares[$event . "-" .$type][0]=$newMiddleware;
-		} else {
-        	$this->middlewares[$event . "-" .$type][1]->setNextMiddleware($newMiddleware);
-        }
-        $this->middlewares[$event . "-" .$type][1]=$newMiddleware;
+	private $presetEvents=array(
+									JK_EVNT_INIT,
+									JK_EVNT_FIND,
+									JK_EVNT_SAVE,
+									JK_EVNT_DEL
+								);
+
+	protected $registeredEvents=array();
+
+	private $presetEventSequence=array(
+										JK_SQNC_PRE,
+										JK_SQNC_POST
+									);
+
+	private function validateEvent($event){
+		if(is_string($event)){
+			if(!empty($this->registeredEvents)){
+				$eventSet = array_intersect($this->presetEvents, $this->registeredEvents);
+			}else{
+				$eventSet=$this->presetEvents;
+			}
+			return in_array($event, $eventSet)||false;
+		}
+		return false;
+	} 
+
+	private function validateEventSequence($sequence){
+		if(is_string($sequence)){
+			return in_array($sequence, $this->presetEventSequence)||false;
+		}
+		return false;
+	} 
+
+	protected function addMiddleware($newMiddleware, $event, $sequence) {
+		if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
+			$newMiddleware->setCollection($this);
+			if(!isset($this->middlewares[$event . "-" .$sequence])){
+				$this->middlewares[$event . "-" .$sequence]=array();
+				$this->middlewares[$event . "-" .$sequence][0]=$newMiddleware;
+			} else {
+	        	$this->middlewares[$event . "-" .$sequence][1]->setNextMiddleware($newMiddleware);
+	        }
+	        $this->middlewares[$event . "-" .$sequence][1]=$newMiddleware;
+	    }
 	}
 
-	protected function callMiddleware($event, $type) {
-		if(isset($this->middlewares[$event . "-" .$type])) {
-			if( !is_null($this->middlewares[$event . "-" .$type][0]) && is_subclass_of($this->middlewares[$event . "-" .$type][0] , '\MongoJacket\Middleware') ) {
-				$this->middlewares[$event . "-" .$type][1]->setNextMiddleware($this);
-				$this->middlewares[$event . "-" .$type][0]->call();
-			} 
+	protected function callMiddleware($event, $sequence) {
+		if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
+			if(isset($this->middlewares[$event . "-" .$sequence])) {
+				if( !is_null($this->middlewares[$event . "-" .$sequence][0]) && is_subclass_of($this->middlewares[$event . "-" .$sequence][0] , '\MongoJacket\Middleware') ) {
+					$this->middlewares[$event . "-" .$sequence][1]->setNextMiddleware($this);
+					$this->middlewares[$event . "-" .$sequence][0]->call();
+				} 
+			}
 		}
 	}
 
