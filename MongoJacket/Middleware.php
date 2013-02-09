@@ -8,23 +8,34 @@
 namespace MongoJacket;
 
 abstract class Middleware {
-    protected $collection;
-    protected $next;
+    private $parent;
+    private $nextMiddelware;
 
-    final public function setCollection($collection) {
-        $this->collection = $collection;
+    final public function setParent($parent) {
+        $this->parent = $parent;
     }
 
-    final public function getCollection() {
-        return $this->collection;
+    final public function getParent() {
+        return $this->parent;
     }
 
-    final public function setNextMiddleware($nextMiddleware) {
-        $this->next = $nextMiddleware;
+    final public function setNext($nextMiddleware) {
+        $this->nextMiddelware = $nextMiddleware;
     }
 
-    final public function getNextMiddleware() {
+    final public function getNext() {
         return $this->next;
+    }
+
+    final public function __get($name)
+    {
+        switch ($name) {
+            case "next":
+                return (isset($this->nextMiddelware) && !is_null($this->nextMiddelware))? $this->nextMiddelware : $this->parent;
+                break;
+            default:
+                return isset($this->$name)? $this->$name : NULL;
+        }
     }
 
     abstract public function call();

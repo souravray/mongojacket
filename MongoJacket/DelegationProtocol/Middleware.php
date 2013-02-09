@@ -53,12 +53,12 @@ trait Middleware
 
 	protected function addMiddleware($newMiddleware, $event, $sequence) {
 		if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
-			$newMiddleware->setCollection($this);
+			$newMiddleware->setParent($this);
 			if(!isset($this->middlewares[$event . "-" .$sequence])){
 				$this->middlewares[$event . "-" .$sequence]=array();
 				$this->middlewares[$event . "-" .$sequence][0]=$newMiddleware;
 			} else {
-	        	$this->middlewares[$event . "-" .$sequence][1]->setNextMiddleware($newMiddleware);
+	        	$this->middlewares[$event . "-" .$sequence][1]->setNext($newMiddleware);
 	        }
 	        $this->middlewares[$event . "-" .$sequence][1]=$newMiddleware;
 	    }
@@ -68,15 +68,15 @@ trait Middleware
 		if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
 			if(isset($this->middlewares[$event . "-" .$sequence])) {
 				if( !is_null($this->middlewares[$event . "-" .$sequence][0]) && is_subclass_of($this->middlewares[$event . "-" .$sequence][0] , '\MongoJacket\Middleware') ) {
-					$this->middlewares[$event . "-" .$sequence][1]->setNextMiddleware($this);
 					$this->middlewares[$event . "-" .$sequence][0]->call();
 				} 
 			}
 		}
 	}
-
-	final public function call() {
-
+	
+	//return call from middleware - can be overridden
+	public function call() {
+		return;
 	}
 }
 
