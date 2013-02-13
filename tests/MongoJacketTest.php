@@ -2,6 +2,15 @@
 
 class MongoJacketTest extends PHPUnit_Framework_TestCase
 {
+    /************************************************
+     * Autoloading
+     ************************************************/
+    public function testAutoloadConstants() {
+        $jacket =  new MongoJacket\Jacket();
+        $collection = $jacket->db("TestingDB")->collection('MyCollection');
+        $this->assertTrue(JK_EVNT_INIT=='init');
+    }
+
      /************************************************
      * CONNECTION AND ACCESS
      ************************************************/
