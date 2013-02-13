@@ -8,86 +8,86 @@
 namespace MongoJacket\Middleware;
 
 class Validator 
-	extends \MongoJacket\Middleware 
-	implements \MongoJacket\DelegationProtocol\Registrable {
+    extends \MongoJacket\Middleware 
+    implements \MongoJacket\DelegationProtocol\Registrable {
 
-	public function register() {
-		if(method_exists($this->parent, 'bind')){
-			$this->parent->bind(
-				'validate',
-				function($arg=null) {
-					if(!is_null($arg) && count($arg)>=2) {
-						$objectPath=$arg[0];
-						$validation=$arg[1]; 
-						$override=isset($arg[2])?$arg[2]:true;
-						if(!isset($this->validations)) {
-							$this->validations=array();
-						}
-						if(is_string($objectPath)){
-							if(!isset($this->validations[$objectPath]) ||
-								(isset($this->validations[$objectPath]) && $override===true)) {
-								if(is_callable($validation)) {
-									$this->validations[$objectPath]=array($validation);
-								} else if(is_array($validation)){
-									$this->validations[$objectPath]=$validation;
-								}
-							} else {
-								if(is_callable($validation)) {
-									array_push($this->validations[$objectPath], $validation);
-								} else if(is_array($validation)){
-									$this->validations[$objectPath]=array_merge($this->validations[$objectPath], $validation);
-								}
-							}
-						}
-					}
-				});
-		}
-	}
+    public function register() {
+        if(method_exists($this->parent, 'bind')){
+            $this->parent->bind(
+                'validate',
+                function($arg=null) {
+                    if(!is_null($arg) && count($arg)>=2) {
+                        $objectPath=$arg[0];
+                        $validation=$arg[1]; 
+                        $override=isset($arg[2])?$arg[2]:true;
+                        if(!isset($this->validations)) {
+                            $this->validations=array();
+                        }
+                        if(is_string($objectPath)){
+                            if(!isset($this->validations[$objectPath]) ||
+                                (isset($this->validations[$objectPath]) && $override===true)) {
+                                if(is_callable($validation)) {
+                                    $this->validations[$objectPath]=array($validation);
+                                } else if(is_array($validation)){
+                                    $this->validations[$objectPath]=$validation;
+                                }
+                            } else {
+                                if(is_callable($validation)) {
+                                    array_push($this->validations[$objectPath], $validation);
+                                } else if(is_array($validation)){
+                                    $this->validations[$objectPath]=array_merge($this->validations[$objectPath], $validation);
+                                }
+                            }
+                        }
+                    }
+                });
+        }
+    }
 
-	private function parseObjectPath($paths, $obj) {
-		$path=array_shift($paths);
-		try {
-			if(is_object($obj) && isset($obj->$path)) {
-				if(!is_object($obj->$path) 
-					|| !is_array($obj->$path) 
-					|| count($paths)==0) {
-					return $obj->$path;
-				} else {
-					return $this->parseObjectPath($paths, $obj->$path);
-				}
-			} else if (is_array($obj) && isset($obj[$path])) {
-				if(!is_object($obj[$path]) 
-					|| !is_array($obj[$path]) 
-					|| count($paths)==0) {
-					return $obj[$path];
-				} else {
-					return $this->parseObjectPath($paths, $obj[$path]);
-				}
-			}
-		} catch(\Exception $e) {}
+    private function parseObjectPath($paths, $obj) {
+        $path=array_shift($paths);
+        try {
+            if(is_object($obj) && isset($obj->$path)) {
+                if(!is_object($obj->$path) 
+                    || !is_array($obj->$path) 
+                    || count($paths)==0) {
+                    return $obj->$path;
+                } else {
+                    return $this->parseObjectPath($paths, $obj->$path);
+                }
+            } else if (is_array($obj) && isset($obj[$path])) {
+                if(!is_object($obj[$path]) 
+                    || !is_array($obj[$path]) 
+                    || count($paths)==0) {
+                    return $obj[$path];
+                } else {
+                    return $this->parseObjectPath($paths, $obj[$path]);
+                }
+            }
+        } catch(\Exception $e) {}
 
-		return null;
-	}
+        return null;
+    }
 
-	private function validate() {
-		$isValid=true;
-		foreach ($this->parent->validations as $objctPath => $callables) {
-			$objctPath=trim($objctPath,"\\");
-			$paths=explode("\\", $objctPath);
-			$object=$this->parseObjectPath($paths, $this->parent->object);
-			foreach ($callables as $callable){
-				$isValid=$isValid && $callable($object);
-			}
-		}
-		return $isValid;
-	} 
+    private function validate() {
+        $isValid=true;
+        foreach ($this->parent->validations as $objctPath => $callables) {
+            $objctPath=trim($objctPath,"\\");
+            $paths=explode("\\", $objctPath);
+            $object=$this->parseObjectPath($paths, $this->parent->object);
+            foreach ($callables as $callable){
+                $isValid=$isValid && $callable($object);
+            }
+        }
+        return $isValid;
+    } 
 
-	public function call(){
-		if($this->validate()===false) {
-			throw new \MongoJacket\Exception('Validation Failed');
-		}
-		$this->next->call();		
-	}
+    public function call(){
+        if($this->validate()===false) {
+            throw new \MongoJacket\Exception('Validation Failed');
+        }
+        $this->next->call();
+    }
 }
 
 ?>

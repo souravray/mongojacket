@@ -47,8 +47,8 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
      /**
      * Test DB method of using a DB pool
      */
-    public function testDBPool()
-    {
+     public function testDBPool()
+     {
         $jacket1 =  new MongoJacket\Jacket();
         $db1=$jacket1->db("TestingDB");
         $db2=$jacket1->db("TestingDB");
@@ -79,5 +79,5 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($col4===$col3);
         $this->assertFalse($col1===$col4);
     }    
- }
+}
 ?>

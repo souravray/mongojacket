@@ -8,44 +8,44 @@
 namespace MongoJacket;
 
 class DB {
-	protected $db=null;
-	protected $collections=array();
+    protected $db=null;
+    protected $collections=array();
 
-	public function __construct($connection=null,$dbname=null) {
-		$this->db=null;
-		$this->collections=array();
+    public function __construct($connection=null,$dbname=null) {
+        $this->db=null;
+        $this->collections=array();
 
-		if( is_null($connection)){
-			throw new Exception('Conection is missing');
-		} else if(is_null($dbname)){ 
-			throw new Exception('Database is missing');
-		} else {
-			try{
-				$this->db = $connection->selectDB($dbname);
-			} catch(MongoConnectionException $e) {
-				throw new Exception('Cannot select database');
-			}
-		}
-		return (is_null($this->db))?null:$this;
-	}
+        if( is_null($connection)){
+            throw new Exception('Conection is missing');
+        } else if(is_null($dbname)){ 
+            throw new Exception('Database is missing');
+        } else {
+            try{
+                $this->db = $connection->selectDB($dbname);
+            } catch(MongoConnectionException $e) {
+                throw new Exception('Cannot select database');
+            }
+        }
+        return (is_null($this->db))?null:$this;
+    }
 
-	public function collection($collectionname) {
-		try{
-			
-			if(isset($this->collections[$collectionname])){
-				return $this->collections[$collectionname];
-			} else {
-				$this->collections[$collectionname]=new Collection($this->db,$collectionname);
-				return $this->collections[$collectionname];
-			}
-		
-		} catch(Exception $e) {
-			throw new Exception($e->getMessage());
-		} catch(\Exception $e) {
-			throw new \Exception($e->getMessage());
-		}
-		return null;
-	}
+    public function collection($collectionname) {
+        try{
+            
+            if(isset($this->collections[$collectionname])){
+                return $this->collections[$collectionname];
+            } else {
+                $this->collections[$collectionname]=new Collection($this->db,$collectionname);
+                return $this->collections[$collectionname];
+            }
+        
+        } catch(Exception $e) {
+            throw new Exception($e->getMessage());
+        } catch(\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+        return null;
+    }
 }
 
 ?>
