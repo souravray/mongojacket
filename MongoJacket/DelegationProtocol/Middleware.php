@@ -14,8 +14,7 @@ define("JK_EVNT_FIND", "find");
 define("JK_EVNT_SAVE", "save");
 define("JK_EVNT_DEL", "delete");
 
-trait Middleware
-{
+trait Middleware {
     protected $middlewares=array();
 
     private $presetEvents=array(
@@ -32,7 +31,7 @@ trait Middleware
                                         JK_SQNC_POST
                                     );
 
-    private function validateEvent($event){
+    final private function validateEvent($event){
         if(is_string($event)){
             if(!empty($this->registeredEvents)){
                 $eventSet = array_intersect($this->presetEvents, $this->registeredEvents);
@@ -44,14 +43,14 @@ trait Middleware
         return false;
     } 
 
-    private function validateEventSequence($sequence){
+    final private function validateEventSequence($sequence){
         if(is_string($sequence)){
             return in_array($sequence, $this->presetEventSequence)||false;
         }
         return false;
-    } 
+    }
 
-    protected function addMiddleware($newMiddleware, $event, $sequence) {
+    final protected function addMiddleware($newMiddleware, $event, $sequence) {
         if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
             $newMiddleware->setParent($this);
             
@@ -69,7 +68,7 @@ trait Middleware
         }
     }
 
-    protected function callMiddleware($event, $sequence) {
+    final protected function callMiddleware($event, $sequence) {
         if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
             if(isset($this->middlewares[$event . "-" .$sequence])) {
                 if( !is_null($this->middlewares[$event . "-" .$sequence][0]) && is_subclass_of($this->middlewares[$event . "-" .$sequence][0] , '\MongoJacket\Middleware') ) {
@@ -79,7 +78,9 @@ trait Middleware
         }
     }
     
-    //return call from middleware - can be overridden
+    // This method is to accept return call from middleware
+    // by default this is a Sentinel method call
+    // can be overridden in implementation class
     public function call() {
         return;
     }
