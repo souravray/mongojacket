@@ -31,7 +31,10 @@ trait Middleware {
                                         JK_SQNC_POST
                                     );
 
-    final private function validateEvent($event){
+    private $currentEvent=null; 
+    private $currentSequence=null;
+
+    private function validateEvent($event){
         if(is_string($event)){
             if(!empty($this->registeredEvents)){
                 $eventSet = array_intersect($this->presetEvents, $this->registeredEvents);
@@ -43,38 +46,64 @@ trait Middleware {
         return false;
     } 
 
-    final private function validateEventSequence($sequence){
+    private function validateEventSequence($sequence){
         if(is_string($sequence)){
             return in_array($sequence, $this->presetEventSequence)||false;
         }
         return false;
     }
 
+    final protected function setEvent($event) {
+        if($this->validateEvent($event)) {
+         $this->currentEvent=$event;
+        }
+        return $this; //Return current instance for Chainable method call 
+    }
+
+    final protected function setSequence($sequence) {
+        if($this->validateEventSequence($sequence)) {
+            $this->currentSequence=$sequence;
+        }
+        return $this; //Return current instance for Chainable method call 
+    }
+
+    final protected function resetEvent(){
+        $this->currentEvent=null;
+        $this->currentSequence=null;
+    }
+
     final protected function addMiddleware($newMiddleware, $event, $sequence) {
-        if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
+        if($this->validateEvent($event) 
+            && $this->validateEventSequence($sequence)) {
             $newMiddleware->setParent($this);
-            
             if($newMiddleware instanceof \MongoJacket\DelegationProtocol\Registrable){
                 $newMiddleware->register();
             }
-
-            if(!isset($this->middlewares[$event . "-" .$sequence])){
-                $this->middlewares[$event . "-" .$sequence]=array();
-                $this->middlewares[$event . "-" .$sequence][0]=$newMiddleware;
+            $eventKey=$event . "-" .$sequence;
+            if(!isset($this->middlewares[$eventKey])){
+                $this->middlewares[$eventKey]=array();
+                $this->middlewares[$eventKey][0]=$newMiddleware;
             } else {
-                $this->middlewares[$event . "-" .$sequence][1]->setNext($newMiddleware);
+                $this->middlewares[$eventKey][1]->setNext($newMiddleware);
             }
-            $this->middlewares[$event . "-" .$sequence][1]=$newMiddleware;
+            $this->middlewares[$eventKey][1]=$newMiddleware;
         }
     }
 
-    final protected function callMiddleware($event, $sequence) {
-        if($this->validateEvent($event) && $this->validateEventSequence($sequence) ) {
-            if(isset($this->middlewares[$event . "-" .$sequence])) {
-                if( !is_null($this->middlewares[$event . "-" .$sequence][0]) && is_subclass_of($this->middlewares[$event . "-" .$sequence][0] , '\MongoJacket\Middleware') ) {
-                    $this->middlewares[$event . "-" .$sequence][0]->call();
-                } 
+    final protected function callMiddleware() {
+        if(!is_null($this->currentEvent) 
+            && !is_null($this->currentSequence)) {
+            $eventKey=$this->currentEvent . "-" .$this->currentSequence;
+            if(isset($this->middlewares[$eventKey])
+                && isset($this->middlewares[$eventKey][0])
+                && is_subclass_of($this->middlewares[$eventKey][0] , '\MongoJacket\Middleware')
+                ) {
+                $this->middlewares[$eventKey][0]->call();
+            } else {
+                $this->call();
             }
+        } else {
+            $this->call();
         }
     }
     
@@ -82,6 +111,7 @@ trait Middleware {
     // by default this is a Sentinel method call
     // can be overridden in implementation class
     public function call() {
+        $this->resetEvent();
         return;
     }
 }
