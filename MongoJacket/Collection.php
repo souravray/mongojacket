@@ -35,13 +35,13 @@ class Collection {
         return (is_null($this->collection))?null:$this;
     }
 
-    public function find($option=array(), $function=null){
+    public function find(){
         $this->parseQuery("find", func_get_args());
         $this->setEvent(JK_EVNT_FIND)->setSequence(JK_SQNC_PRE)->callMiddleware();
         return $this->delegatedOrReturned();
     }
 
-    public function findOne($option=array(), $function=null){
+    public function findOne(){
         $this->parseQuery("findOne", func_get_args());
         $this->setEvent(JK_EVNT_FIND)->setSequence(JK_SQNC_PRE)->callMiddleware();
         return $this->delegatedOrReturned();
@@ -65,6 +65,12 @@ class Collection {
         return $this->delegatedOrReturned();
     }
 
+    public function findAndModify(){
+        $this->parseQuery("findAndModify", func_get_args());
+        $this->setEvent(JK_EVNT_SAVE)->setSequence(JK_SQNC_PRE)->callMiddleware();
+        return $this->delegatedOrReturned();
+    }
+
     public function call(\Exception $exception=null) {
        try{
             if(is_null($exception)){
@@ -78,11 +84,11 @@ class Collection {
             } else {
                 $this->exception=$exception;
             }
-        } catch(MongoResultException $e) {
+        } catch(\MongoResultException $e) {
             $this->exception= new Exception('Query failed: '. $e->getMessage());
-        } catch(MongoCursorException $e) {
+        } catch(\MongoCursorException $e) {
             $this->exception= new Exception('Cursor error: '. $e->getMessage());
-        } catch(MongoCursorTimeoutException $e) {
+        } catch(\MongoCursorTimeoutException $e) {
             $this->exception= new Exception('Cursor Timeout: '. $e->getMessage());
         } catch (\Exception $e){
             $this->exception=new Exception($e->getMessage());
