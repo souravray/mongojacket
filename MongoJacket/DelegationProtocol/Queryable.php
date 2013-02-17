@@ -52,7 +52,7 @@ trait Queryable {
                 case "find":
                     $this->criteria=$this->unshiftStack($arguments, array());
                     $this->fields=$this->unshiftStack($arguments,array());
-                    $this->query=function($obj) {
+                    $this->query=function($obj) {                       
                             $obj->objects=$obj->collection->find($obj->criteria, $obj->fields);
                             $obj->result=&$obj->objects;
                         };
@@ -91,7 +91,7 @@ trait Queryable {
 
     private function unshiftStack(&$arguments, $valueIfEmpty=null) {
         if(!empty($arguments)){            
-            $value=(count($arguments)>1)?array_shift($arguments):$arguments[0];
+            $value=array_shift($arguments);
             return $value;
         }
         return $valueIfEmpty;
