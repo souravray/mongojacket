@@ -67,6 +67,10 @@ trait Middleware {
         return $this; //Return current instance for Chainable method call 
     }
 
+    final protected function getSequence() {
+        return $this->currentSequence;
+    }
+
     final protected function resetEvent(){
         $this->currentEvent=null;
         $this->currentSequence=null;
@@ -97,21 +101,28 @@ trait Middleware {
             if(isset($this->middlewares[$eventKey])
                 && isset($this->middlewares[$eventKey][0])
                 && is_subclass_of($this->middlewares[$eventKey][0] , '\MongoJacket\Middleware')
-                ) {
-                $this->middlewares[$eventKey][0]->call();
+            ) {
+                try{
+                    $this->middlewares[$eventKey][0]->call();
+                } catch(\Exception $e) {
+                   return $this->call($e);
+                }
             } else {
-                $this->call();
+                return $this->call();
             }
         } else {
-            $this->call();
+            return $this->call();
         }
     }
     
     // This method is to accept return call from middleware
     // by default this is a Sentinel method call
     // can be overridden in implementation class
-    public function call() {
+    public function call(\Exception $exception=null) {
         $this->resetEvent();
+        if(!is_null($exception)){
+            throw new \MongoJacket\Exception($exception->getMessage());
+        }
         return;
     }
 }

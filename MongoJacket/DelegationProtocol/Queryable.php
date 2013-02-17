@@ -11,40 +11,104 @@ namespace MongoJacket\DelegationProtocol;
 trait Queryable {
     protected $query=null;
     protected $callback=null;
+    public $objects=null;
     public $object=null;
     public $criteria=null;
+    public $fields=null;
+    public $result=null;
+    protected $exception=null;
+    public $options=array();
 
-    final protected function query($method=null, $arguments){
-        switch ($method){
-            case "aggregate":
-            case "batchInsert":
-            case "count":
-            case "createDBRef":
-            case "deleteIndex":
-            case "deleteIndexes":
-            case "distinct":
-            case "drop":
-            case "ensureIndex":
-            case "find":
-            case "findAndModify":
-            case "findOne":
-            case "getDBRef":
-            case "getIndexInfo":
-            case "getName":
-            case "getReadPreference":
-            case "group":
-            case "insert":
-            case "remove":
-            case "save":
-            case "setReadPreference":
-            case "toIndexString":
-            case "update":
-            case "validate":
-            default:
-                break;
+    final protected function parseQuery($method=null, $arguments=array()){
+        $this->resetGlobalQuery();
+        if(!is_null($method)) {
+            if(count($arguments) >1 
+                && is_callable($arguments[count($arguments)-1])
+            ) {
+                $this->callback=array_pop($arguments);
+            }
+            switch ($method){
+                case "batchInsert":
+                    $this->objects=$this->unshiftStack($arguments);
+                    $this->options=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->result=$obj->collection->batchInsert($obj->objects, $obj->options);
+                        };
+                    break;
+                case "insert":
+                    $this->object=$this->unshiftStack($arguments);
+                    $this->options=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->result=$obj->collection->insert($obj->object, $obj->options);
+                        };
+                    break;
+                case "save":
+                    $this->object=$this->unshiftStack($arguments);
+                    $this->options=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->result=$obj->collection->save($obj->object, $obj->options);
+                        };
+                    break;
+                case "find":
+                    $this->criteria=$this->unshiftStack($arguments, array());
+                    $this->fields=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->objects=$obj->collection->find($obj->criteria, $obj->fields);
+                            $obj->result=&$obj->objects;
+                        };
+                    break;
+                case "findOne":
+                    $this->criteria=$this->unshiftStack($arguments, array());
+                    $this->fields=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->object=$obj->collection->findOne($obj->criteria, $obj->fields);
+                            $obj->result=&$obj->object;
+                        };
+                    break;
+                case "findAndModify":                
+                case "count":
+                case "createDBRef":
+                case "deleteIndex":
+                case "deleteIndexes":
+                case "distinct":
+                case "drop":
+                case "ensureIndex":
+                case "getDBRef":
+                case "getIndexInfo":
+                case "getName":
+                case "getReadPreference":
+                case "group":
+                case "remove":                
+                case "setReadPreference":
+                case "toIndexString":
+                case "update":
+                case "validate":
+                default:
+                    break;
+            }
         }
     } 
 
+    private function unshiftStack(&$arguments, $valueIfEmpty=null) {
+        if(!empty($arguments)){            
+            $value=(count($arguments)>1)?array_shift($arguments):$arguments[0];
+            return $value;
+        }
+        return $valueIfEmpty;
+    }
+
+    private function resetGlobalQuery(){
+        $this->callback=null;
+        $this->objects=null;
+        $this->object=null;
+        $this->criteria=null;
+        $this->result=null;
+        $this->exception=null;
+        $this->options=array();
+    }
+
 }
+
+
 
 ?>

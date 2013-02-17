@@ -14,7 +14,7 @@ class Validator
     public function register() {
         if(method_exists($this->parent, 'bind')){
             $this->parent->bind(
-                'validate',
+                'validator',
                 function($arg=null) {
                     if(!is_null($arg) && count($arg)>=2) {
                         $objectPath=$arg[0];
@@ -69,21 +69,34 @@ class Validator
         return null;
     }
 
+    private function callValidator($callables, $object){
+        $isValid=true;
+        foreach ($callables as $callable){
+            $isValid=$isValid && $callable($object);
+        }
+        return $isValid;
+    }
+
     private function validate() {
         $isValid=true;
         foreach ($this->parent->validations as $objctPath => $callables) {
             $objctPath=trim($objctPath,"\\");
             $paths=explode("\\", $objctPath);
-            $object=$this->parseObjectPath($paths, $this->parent->object);
-            foreach ($callables as $callable){
-                $isValid=$isValid && $callable($object);
-            }
+            if(!is_null($this->parent->object)){
+                $object=$this->parseObjectPath($paths, $this->parent->object);
+                $isValid=$this->callValidator($callables, $object);
+            } else if(!is_null($this->parent->objects)){
+                foreach ($this->parent->objects as $docObject){
+                    $object=$this->parseObjectPath($paths, $docObject);
+                    $isValid=$isValid && $this->callValidator($callables, $object);
+                }
+            }       
         }
         return $isValid;
     } 
 
-    public function call(){
-        if($this->validate()===false) {
+    public function call() {
+        if(!$this->validate()) {
             throw new \MongoJacket\Exception('Validation Failed');
         }
         $this->next->call();
