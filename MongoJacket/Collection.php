@@ -71,6 +71,12 @@ class Collection {
         return $this->delegatedOrReturned();
     }
 
+    public function update(){
+        $this->parseQuery("update", func_get_args());
+        $this->setEvent(JK_EVNT_SAVE)->setSequence(JK_SQNC_PRE)->callMiddleware();
+        return $this->delegatedOrReturned();
+    }
+
     public function call(\Exception $exception=null) {
        try{
             if(is_null($exception)){

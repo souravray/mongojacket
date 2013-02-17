@@ -74,7 +74,15 @@ trait Queryable {
                             $obj->object=$obj->collection->findAndModify($obj->criteria, $this->object, $obj->fields, $this->options);
                             $obj->result=&$obj->object;
                         };
-                    break;              
+                    break;
+                case "update":
+                    $this->criteria=$this->unshiftStack($arguments, array());
+                    $this->object=$this->unshiftStack($arguments,array());
+                    $this->options=$this->unshiftStack($arguments,array());
+                    $this->query=function($obj) {
+                            $obj->result=$obj->collection->findAndModify($obj->criteria, $this->object, $this->options);
+                        };
+                    break; 
                 case "count":
                 case "createDBRef":
                 case "deleteIndex":
@@ -90,7 +98,6 @@ trait Queryable {
                 case "remove":                
                 case "setReadPreference":
                 case "toIndexString":
-                case "update":
                 case "validate":
                 default:
                     break;
