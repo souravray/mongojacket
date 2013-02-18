@@ -12,8 +12,8 @@ A simple abstraction layer for [PHP MongoDB Driver](http://www.php.net/manual/en
 ## Table of contents
 * [Quick Start](#quick-start)
 * [API](#api)
-  * [Callbacks](#Callbacks)
-  * [Exception Handling](#exception-handling)
+* [Callbacks](#callbacks)
+* [Exception Handling](#exception-handling)
 * [Binding of Custom Methods](#binding-of-custom-methods)
 * [Middleware](#middleware)
 * [Validator](#validator)
@@ -43,7 +43,7 @@ Using native driver
 ```php
     $m = new MongoClient("mongodb://user:pas@localhost:27017/test"); 
 ```
-Using Mongjacket
+Using MongoJacket
 ```php
     $jacket =  new MongoJacket\Jacket('localhost:27017', 'test', 'user', 'pass'); 
 ```
@@ -53,7 +53,7 @@ Using native driver
 ```php
     $db = $m->selectDB("rockband"); 
 ```
-Using Mongjacket
+Using MongoJacket
 ```php
     $db =  $jacket->db('rockband'); 
 ```
@@ -62,7 +62,7 @@ Using native driver
 ```php
     $collection = $db->selectCollection('bands'); 
 ```
-Using Mongjacket
+Using MongoJacket
 ```php
     $collection =  $db->collection('bands'); 
 ```
@@ -74,10 +74,14 @@ You can call commands in chain
 ### Queries
 Currently only following query methods of native PHP-Mongo drive are supported in MongoJacket.
 
-``` find, findOne, insert, save, batchInsert, findAndModify, Update ```
+``` find ```, ``` findOne ```, ``` insert ```, ``` save ```, ``` batchInsert ```, ``` findAndModify ```, ``` Update ```
 
-### Callbacks
-As an additional parameter to any query method you can pass an anonymous function as callback. All the following syntax are correct.
+MongoJackect query methods return the same value as native APIs or an exception object in case of any exception.
+##### [Back to Index](#table-of-contents)
+
+
+## Callbacks
+As an additional parameter to any query method you can pass an anonymous function as callback. All the following syntax are correct. Callback method can return a value to the caller of the parent query.  
 ```php
 // pass a callback method to find method 
 // without any criteria or field specified
@@ -109,8 +113,8 @@ As an additional parameter to any query method you can pass an anonymous functio
                 }
             );
 ```
-#### Using $this and Infinite Command Sequencing
-In the callback method you are allowed tho use ``` $this ```
+### Using $this and Infinite Command Sequencing
+In the callback method you are allowed tho use ``` $this ```.
 It is allowed to call another query method and pass a callback function inside a callback function. Theoretically it can be looped till infinite time. All inner queries and callbacks will be executed in sequence.
 ```php
 // command/ callback sequencing
@@ -130,6 +134,38 @@ It is allowed to call another query method and pass a callback function inside a
                                         // some code here 
                                     } );
                     return $results; //return to the calling parameter
+                }
+            );
+```
+##### [Back to Index](#table-of-contents)
+
+
+## Exception Handling
+MongoJacket exceptions are objects ```\MongoJacket\Exception```. Exceptions are not thrown in MongoJacket APIs. In case of an exception MongoJacket  will return an  ```\MongoJacket\Exception``` object instead of result when callback method is not available. You can validate the response like bellow.
+
+```php
+// no callback is added
+    $isinseted = $jacket->db('rockband')->collection('bands')->save( array(
+                                                    "name"=>"Velvet Revolver",
+                                                    "members"=> array("Scott Weiland",
+                                                                        "Slash",
+                                                                        "Dave Kushner",
+                                                                        "Matt Sorum",
+                                                                        "Duff McKagan"),
+                                                    "year"=>1984) );
+    if(is_a($isinseted, '\MongoJacket\Exception' ){
+        // some diagnostic action
+    }
+```
+when a callback function is added. Exception object is passed as the second parameter to the function. If no exception is there then ``` null ``` is passed in that place.
+```php
+// a callback is added
+    $bands = $jacket->db('rockband')->collection('bands')->find(
+                function($results,$error){
+                    if(is_null($error)
+                        && is_a($error, '\MongoJacket\Exception' ){
+                        // some diagnostic action
+                    }
                 }
             );
 ```
