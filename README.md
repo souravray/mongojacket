@@ -172,7 +172,22 @@ when a callback function is added. Exception object is passed as the second para
 ##### [Back to Index](#table-of-contents)
 
 
-## Binding of custom methods
+## Binding of Custom Methods
+A custom method can be binded to a collection like bellow.
+```php
+    $jacket->db('rockband')->collection('bands')->bind(
+                                                    "McKaganBands", 
+                                                    function (){
+                                                       return $this->find(array("member" => 'Duff McKagan'));
+                                                    });
+```
+Calling custom method
+```php
+    $jacket->db('rockband')->collection('bands')->McKaganBands();
+```
+### Passing Parameters to Binded Methods
+The function cannot accept multiple parameters in the definition. Any parameter passed during custom method call can be accessed using ``` func_get_args() ```.
+
 ##### [Back to Index](#table-of-contents)
 
 
