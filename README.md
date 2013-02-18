@@ -205,11 +205,148 @@ MongoJacket support a mechanism for adding middleware. A simple middleware can b
 Middleware can be bind to following ``` Pre ``` or ``` Post ``` events:
 ``` init ```, ``` find ```, ``` save ```, ``` delete ```
 At present only Collection implements middleware protocol, and the registry method is  a private method. MongoJacket will add ability to register third-party middlewars in future.
-
 ##### [Back to Index](#table-of-contents))
 
 
 ## Validator
+MongoJacket ``` validator ``` is a Middleware. MongoJacket does not required any  schema definition for mapping. It allows to add validation rules to Document elements for a collection. The validator method get called during ``` Pre Save ``` event. If a validation fails then an the query fails and exception object is returned.
+
+```php
+// Validator-1 
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator('year',
+                function ($var) { 
+                    // no new band after 2010 is allowed
+                    return ($var<2010);
+                }
+            );
+// Validator-2
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator('name',
+                function ($var) { 
+                    //  Limp Bizkit is not allowed
+                    return !($var=="Limp Bizkit");
+                }
+            );
+
+// this will fail due to Validator 1
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Modern Alarms",
+            "members"=> array(  "Dominic Barber",
+                                "David Fraser",
+                                "Colm Feeley",
+                                "Andy Gledhill"),
+            "year"=>2012)
+    );
+
+// this will fail due to Validator 2
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Limp Bizkit",
+            "members"=> array(  "Fred Durst",
+                                "Wes Borland",
+                                "Sam Rivers",
+                                "John Otto",
+                                "DJ Lethal"),
+            "year"=>1994)
+    );
+```
+### Overriding Validor and Sequencing
+By default if another validator is added to same entity, then the first validation rule will be over ridden by the lastly added rule.
+
+```php
+// Validator-1 
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator('year',
+                function ($var) { 
+                    // only bands formed before 2012 are allowed
+                    return ($var<2012);
+                }
+            );
+// Validator-2 overrides the rule
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator(year',
+                function ($var) { 
+                    // only bands formed after 1994 is allowed
+                    return ($var>1994);
+                }
+            );
+
+    // this will be success because the final rule: year > 1994
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Modern Alarms",
+            "members"=> array(  "Dominic Barber",
+                                "David Fraser",
+                                "Colm Feeley",
+                                "Andy Gledhill"),
+            "year"=>2012)
+    );
+
+    // this will fail because the final rule: year > 1994
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Limp Bizkit",
+            "members"=> array(  "Fred Durst",
+                                "Wes Borland",
+                                "Sam Rivers",
+                                "John Otto",
+                                "DJ Lethal"),
+            "year"=>1994)
+    );
+```
+
+In the above example if the second validator Boolean ``` false ``` is passed as second parameter to the ``` validator ``` method, then both the validation rules will be chained.
+
+```php
+// Validator-1 
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator('year',
+                function ($var) { 
+                    // only bands formed before 2012 are allowed
+                    return ($var<2012);
+                }
+            );
+// Validator-2 overrides the rule
+    $jacket->db('rockband')->
+    collection('bands')->
+    validator(year',
+                function ($var) { 
+                    // only bands formed after 1994 is allowed
+                    return ($var>1994);
+                },
+                false
+            );
+
+    // this will fail because the final rule: 1994 < year < 2012
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Modern Alarms",
+            "members"=> array(  "Dominic Barber",
+                                "David Fraser",
+                                "Colm Feeley",
+                                "Andy Gledhill"),
+            "year"=>2012)
+    );
+
+    // this will fail because the final rule: 1994 < year < 2012
+    $jacket->db('rockband')
+    ->collection('bands')->insert(array(
+            "name"=>"Limp Bizkit",
+            "members"=> array(  "Fred Durst",
+                                "Wes Borland",
+                                "Sam Rivers",
+                                "John Otto",
+                                "DJ Lethal"),
+            "year"=>1994)
+    );
+```
 ##### [Back to Index](#table-of-contents)
 
 
