@@ -270,7 +270,7 @@ By default if another validator is added to same entity, then the first validati
 // Validator-2 overrides the rule
     $jacket->db('rockband')->
     collection('bands')->
-    validator(year',
+    validator('year',
                 function ($var) { 
                     // only bands formed after 1994 is allowed
                     return ($var>1994);
@@ -316,7 +316,7 @@ In the above example if the second validator Boolean ``` false ``` is passed as 
 // Validator-2 overrides the rule
     $jacket->db('rockband')->
     collection('bands')->
-    validator(year',
+    validator('year',
                 function ($var) { 
                     // only bands formed after 1994 is allowed
                     return ($var>1994);
