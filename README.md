@@ -192,6 +192,20 @@ The function cannot accept multiple parameters in the definition. Any parameter 
 
 
 ## Middleware
+MongoJacket support a mechanism for adding middleware. A simple middleware can be written like bellow.
+```php
+    class MyMiddleware extends \MongoJacket\Middleware{
+        // your middileware logic should be here 
+        public function call(){
+            // here do some magic
+            $this->next->call();
+        }
+    }
+```
+Middleware can be bind to following ``` Pre ``` or ``` Post ``` events:
+``` init ```, ``` find ```, ``` save ```, ``` delete ```
+At present only Collection implements middleware protocol, and the registry method is  a private method. MongoJacket will add ability to register third-party middlewars in future.
+
 ##### [Back to Index](#table-of-contents))
 
 
