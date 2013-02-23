@@ -57,9 +57,9 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $db3=$jacket2->db("TestingDB");
         $db4=$jacket2->db("TestingDB");
 
-        $this->assertTrue($db1===$db2);
-        $this->assertTrue($db4===$db3);
-        $this->assertFalse($db1===$db4);
+        $this->assertSame($db1,$db2);
+        $this->assertSame($db4,$db3);
+        $this->assertNotSame($db1,$db4);
     }
 
     /**
@@ -75,9 +75,9 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $col3=$jacket2->db("TestingDB")->collection('MyCollection');
         $col4=$jacket2->db("TestingDB")->collection('MyCollection');
 
-        $this->assertTrue($col1===$col2);
-        $this->assertTrue($col4===$col3);
-        $this->assertFalse($col1===$col4);
+        $this->assertSame($col1,$col2);
+        $this->assertSame($col4,$col3);
+        $this->assertNotSame($col1,$col4);
     }    
 }
 ?>
