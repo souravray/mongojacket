@@ -79,18 +79,21 @@ class Validator
 
     private function validate() {
         $isValid=true;
-        foreach ($this->parent->validations as $objctPath => $callables) {
-            $objctPath=trim($objctPath,"\\");
-            $paths=explode("\\", $objctPath);
-            if(!is_null($this->parent->object)){
-                $object=$this->parseObjectPath($paths, $this->parent->object);
-                $isValid=$this->callValidator($callables, $object);
-            } else if(!is_null($this->parent->objects)){
-                foreach ($this->parent->objects as $docObject){
-                    $object=$this->parseObjectPath($paths, $docObject);
-                    $isValid=$isValid && $this->callValidator($callables, $object);
-                }
-            }       
+        if(isset($this->parent->validations) 
+            && is_array($this->parent->validations)) {
+            foreach ($this->parent->validations as $objctPath => $callables) {
+                $objctPath=trim($objctPath,"\\");
+                $paths=explode("\\", $objctPath);
+                if(!is_null($this->parent->object)){
+                    $object=$this->parseObjectPath($paths, $this->parent->object);
+                    $isValid=$this->callValidator($callables, $object);
+                } else if(!is_null($this->parent->objects)){
+                    foreach ($this->parent->objects as $docObject){
+                        $object=$this->parseObjectPath($paths, $docObject);
+                        $isValid=$isValid && $this->callValidator($callables, $object);
+                    }
+                }       
+            }
         }
         return $isValid;
     } 
