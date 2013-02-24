@@ -30,7 +30,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test  DB method of returns Oject of  MongoJacket\DB class
+     * Test  DB method of returns Object of  MongoJacket\DB class
      */
     public function testDBSelection()
     {
@@ -40,7 +40,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test  Collection method of returns Oject of  MongoJacket\Collection class
+     * Test  Collection method of returns Object of  MongoJacket\Collection class
      */
     public function testCollectionSelection()
     {
@@ -90,7 +90,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
      ************************************************/
 
     /**
-     * Test Insert method of returns Oject of  MongoJacket\DB class
+     * Test Insert method of returns Bool-true
      */
     public function testDocumentInsert()
     {
@@ -104,7 +104,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test Find method of returns Oject of  MongoJacket\DB class
+     * Test Find method of returns Object of Mongo cursor
      */
     public function testDocumentFind()
     {
@@ -120,7 +120,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test FindOne method of returns Oject of  MongoJacket\DB class
+     * Test FindOne method of returns array
      */
     public function testDocumentFindOne()
     {
@@ -137,7 +137,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test Save method of returns Oject of  MongoJacket\DB class
+     * Test Save method of returns Bool - true
      */
     public function testDocumentSave()
     {
@@ -162,7 +162,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test Update method of returns Oject of  MongoJacket\DB class
+     * Test Update method of returns Object of Bool - true
      */
     public function testDocumentUpdate()
     {
@@ -190,7 +190,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test Batch insert method of returns Oject of  MongoJacket\DB class
+     * Test Batch insert method of returns Object of Bool - true
      */
     public function testDocumentBatchInsert()
     {
@@ -208,6 +208,29 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         
         $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
         $this->assertTrue($results->count()==3);  
+    }
+
+    /**
+     * Test FindAndUpdate insert method of returns Object of array
+     */
+    public function testDocumentFindAndUpdate()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $col->Insert(array( "name"=> "test-insert-".$this->unquieTestKey , 
+                                "purpose"=> "testing") );
+        
+        $result=$col->findAndModify(array("name"=> "test-insert-".$this->unquieTestKey),
+                            array( "name"=> "test-insert-".$this->unquieTestKey,
+                                   "purpose"=> "modified"),
+                            array(),
+                            array("new"=>true)
+                            );
+
+        $result=$col->FindOne(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertFalse(is_null($result));
+        $this->assertTrue(isset($result["purpose"]));
+        $this->assertSame("modified",$result["purpose"]); 
     }
 }
 ?>
