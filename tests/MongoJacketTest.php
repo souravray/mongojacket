@@ -119,5 +119,75 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * Test FindOne method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentFindOne()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $isSucess=$col->Insert(array(
+                            "name"=> "test-insert-".$this->unquieTestKey , 
+                            "purpose"=> "testing")
+                    );
+        $result=$col->FindOne(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertFalse(is_a($result,'MongoJacket\Exception'));
+        $this->assertFalse(is_null($result));
+        $this->assertTrue(is_array($result));
+    }
+
+    /**
+     * Test Save method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentSave()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $col->Insert(array(
+                        "name"=> "test-insert-".$this->unquieTestKey , 
+                        "purpose"=> "testing")
+                    );
+        
+        $resultToUpdate=$col->FindOne(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertSame("testing",$resultToUpdate["purpose"]);
+        $resultToUpdate["purpose"]="tested";
+        $col->Save($resultToUpdate);
+        
+        $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertTrue($results->count()==1);  
+        $result=$results->getNext();
+        $this->assertFalse(is_null($result));
+        $this->assertTrue(isset($result["purpose"]));
+        $this->assertSame("tested",$result["purpose"]);
+    }
+
+    /**
+     * Test Update method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentUpdate()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $col->Insert(array(
+                        "name"=> "test-insert-".$this->unquieTestKey , 
+                        "purpose"=> "testing")
+                    );
+        
+        $resultToUpdate=$col->FindOne(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertSame("testing",$resultToUpdate["purpose"]);
+
+        $col->Update( array("name"=> "test-insert-".$this->unquieTestKey),
+                        array(
+                        "name"=> "test-insert-".$this->unquieTestKey , 
+                        "purpose"=> "updated"));
+        
+        $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertTrue($results->count()==1);  
+        $result=$results->getNext();
+        $this->assertFalse(is_null($result));
+        $this->assertTrue(isset($result["purpose"]));
+        $this->assertSame("updated",$result["purpose"]);
+    }
+
 }
 ?>
