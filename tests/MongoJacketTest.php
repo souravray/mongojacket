@@ -189,5 +189,25 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $this->assertSame("updated",$result["purpose"]);
     }
 
+    /**
+     * Test Batch insert method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentBatchInsert()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $col->BatchInsert(array(
+                        array( "name"=> "test-insert-".$this->unquieTestKey , 
+                                "purpose"=> "testing") ,
+                        array( "name"=> "test-insert-".$this->unquieTestKey , 
+                                "purpose"=> "testing") ,
+                        array( "name"=> "test-insert-".$this->unquieTestKey , 
+                                "purpose"=> "testing")
+                        )
+                    );
+        
+        $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertTrue($results->count()==3);  
+    }
 }
 ?>
