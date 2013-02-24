@@ -2,6 +2,11 @@
 
 class MongoJacketTest extends PHPUnit_Framework_TestCase
 {
+    protected $unquieTestKey;
+    public function setUp() {
+        $this->unquieTestKey=uniqid();
+    }
+
     /************************************************
      * Autoloading
      ************************************************/
@@ -11,7 +16,7 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(JK_EVNT_INIT=='init');
     }
 
-     /************************************************
+    /************************************************
      * CONNECTION AND ACCESS
      ************************************************/
 
@@ -78,6 +83,41 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $this->assertSame($col1,$col2);
         $this->assertSame($col4,$col3);
         $this->assertNotSame($col1,$col4);
-    }    
+    }
+
+    /************************************************
+     * CONNECTION AND ACCESS
+     ************************************************/
+
+    /**
+     * Test Insert method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentInsert()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $isSucess=$col->Insert(array(
+                            "name"=> "test-insert-".$this->unquieTestKey , 
+                            "purpose"=> "testing")
+                    );
+        $this->assertTrue($isSucess===TRUE);
+    }
+
+    /**
+     * Test Find method of returns Oject of  MongoJacket\DB class
+     */
+    public function testDocumentFind()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $results=$col->Find(array("purpose"=> "testing"));
+        $this->assertFalse(is_a($results,'MongoJacket\Exception'));
+        $this->assertTrue($results->count()>0);
+        for($i=0; $i<$results->count();$i++){
+            $result=$results->getNext();
+            $this->assertFalse(is_null($result));
+        }
+    }
+
 }
 ?>
