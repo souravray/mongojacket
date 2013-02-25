@@ -232,5 +232,23 @@ class MongoJacketTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(isset($result["purpose"]));
         $this->assertSame("modified",$result["purpose"]); 
     }
+
+    /**
+     * Test Remove insert method of returns Object of array
+     */
+    public function testDocumentRemove()
+    {
+        $jacket=new MongoJacket\Jacket();
+        $col=$jacket->db("TestingDB")->collection('MyCollection');
+        $col->Insert(array( "name"=> "test-insert-".$this->unquieTestKey , 
+                                "purpose"=> "testing") );
+        $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertTrue($results->count()==1); 
+
+        $result=$col->remove(array("name"=> "test-insert-".$this->unquieTestKey));
+
+        $results=$col->Find(array("name"=> "test-insert-".$this->unquieTestKey));
+        $this->assertTrue($results->count()==0); 
+    }
 }
 ?>

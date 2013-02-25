@@ -77,6 +77,12 @@ class Collection {
         return $this->delegatedOrReturned();
     }
 
+    public function remove(){
+        $this->parseQuery("remove", func_get_args());
+        $this->setEvent(JK_EVNT_DEL)->setSequence(JK_SQNC_PRE)->callMiddleware();
+        return $this->delegatedOrReturned();
+    }
+
     public function call(\Exception $exception=null) {
        try{
             if(is_null($exception)){
