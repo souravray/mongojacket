@@ -2,6 +2,7 @@ MongoJacket
 =====================
 A simple abstraction layer for [PHP MongoDB Driver](http://www.php.net/manual/en/book.mongo.php)
 ## Build Matrix
+[![Build Status](https://secure.travis-ci.org/souravray/mongojacket)](http://travis-ci.org/souravray/mongojacket)
 - Current Build: 0.0.1_nb
 - Stability: Unstable
 - Compatibility:
