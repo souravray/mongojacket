@@ -2,7 +2,7 @@
     "name": "mongojacket/mongojacket",
     "type": "library",
     "description": "A wrapper for PHP MongoDB drivers",
-    "keywords": ["mongodb","mongo","odm"],
+    "keywords": ["mongodb","mongo","odm","PHP 5.4"],
     "homepage": "http://github.com/souravray/mongojacket",
     "license": "The BSD 2-Clause License",
     "authors": [
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-0": {
-            "MongoJacket": "src"
+            "MongoJacket": "MongoJacket/"
         }
     }
 }
