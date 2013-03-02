@@ -26,15 +26,50 @@ A simple abstraction layer for [PHP MongoDB Driver](http://www.php.net/manual/en
 MongoJacke is not one of those bloated ODMs you encounter everyday. It essentially gives developers an interface similar to native Mongo driver. In addition to that, MongoJacke allows developer to add custom methods, callbacks and validation rules.
 
 ### Installation
-MongoJacket is not ready for installation with Composer. For now you need to follow these manual steps to add MongoJacket to your project.
+##### Install via Composer
+Install composer in your project
+
+```
+    curl -s https://getcomposer.org/installer | php
+```
+
+Create a ```composer.json``` file in your project
+
+```
+    {
+        "require": {
+            "mongojacket/mongojacket": "dev-master"
+        }
+    }
+```
+
+Run composer install
+
+```
+    php composer.phar install
+```
+
+Add this line to your application
+
+```php
+    require 'vendor/autoload.php';
+```
+
+##### Manual Installation
+Git clone mongojacket in your project
+
+```
+    git clone git://github.com/souravray/mongojacket.git
+```
+
+Include following line to your application 
 
 ```php
 // inclue MongoJacket file
-    include_once("MongoJacket/index.php");
+    include_once("Path To MongoJacket/index.php");
 // register autoloader
     spl_autoload_register('MongoJacket\MongoJacketAutoloader');
 ```
-
 
 ## API
 API is exactly same as PHP-Mongo driver.
