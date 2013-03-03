@@ -126,7 +126,7 @@ class Collection {
 
     public function __call($functionName, $arguments) {
         if(isset($this->callables[$functionName])) {
-            $this->callables[$functionName]($arguments);            
+           return $this->callables[$functionName]($arguments);            
         } else {
            throw new Exception('Unknown method');
         }
