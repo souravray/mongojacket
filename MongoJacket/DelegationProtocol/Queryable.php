@@ -14,6 +14,8 @@ trait Queryable {
     public $objects=null;
     public $object=null;
     public $criteria=null;
+    public $limit=0;
+    public $skip=0;
     public $fields=null;
     public $result=null;
     protected $exception=null;
@@ -91,20 +93,27 @@ trait Queryable {
                         };
                     break;
                 case "count":
-                case "createDBRef":
+                    $this->criteria=$this->unshiftStack($arguments, array());
+                    $this->limit=$this->unshiftStack($arguments,0);
+                    $this->skip=$this->unshiftStack($arguments,0);
+                    $this->query=function($obj) {
+                            $obj->result=$obj->collection->count($obj->criteria, $this->limit, $this->skip);
+                        };
+                    break;
+                case "validate":
+                case "toIndexString":
+                case "ensureIndex":
+                case "getIndexInfo":
                 case "deleteIndex":
                 case "deleteIndexes":
+                case "createDBRef":
+                case "getDBRef":
                 case "distinct":
                 case "drop":
-                case "ensureIndex":
-                case "getDBRef":
-                case "getIndexInfo":
                 case "getName":
-                case "getReadPreference":
-                case "group":                
+                case "getReadPreference":              
                 case "setReadPreference":
-                case "toIndexString":
-                case "validate":
+                case "group":               
                 default:
                     break;
             }
