@@ -83,6 +83,13 @@ class Collection {
         return $this->delegatedOrReturned();
     }
 
+    public function count(){
+        $this->parseQuery("remove", func_get_args());
+        $query=$this->query;
+        $query($this);
+        return $this->delegatedOrReturned();
+    }
+
     public function call(\Exception $exception=null) {
        try{
             if(is_null($exception)){
